@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = "A simple gem for processing documents to html with google drive"
   s.authors     = ["Seth Wolfwood"]
   s.email       = 'seth@sethish.com'
-  s.files       = ["lib/gdrive.rb"]
+  s.files       = ["lib/rGooDrive.rb"]
   s.homepage    =
     'https://github.com/sethwoodworth/rGooDrive'
 end
