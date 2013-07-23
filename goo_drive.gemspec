@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'goo_drive/version'
 
 Gem::Specification.new do |spec|
-  spec.name         = 'GooDrive'
+  spec.name         = 'goo_drive'
   spec.version       = GooDrive::VERSION
   spec.date          = '2013-07-22'
   spec.summary       = "A simple gem for processing documents to html with google drive"
