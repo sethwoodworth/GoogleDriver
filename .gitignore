@@ -17,3 +17,5 @@ tmp
 _yardoc
 doc/
 Gemfile.lock
+private.yml
+c4b5f7a63840832bd50429c23bd94fabab8c109d-privatekey.p12

@@ -3,14 +3,19 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'yaml'
-require 'rspec'
+require 'rspec/core/shared_context'
+require "goo_drive"
 
 RSpec.configure do |config|
-  config.treat_symbols_as_metadata_keys_with_true_values = true
-  config.run_all_when_everything_filtered = true
-  config.filter_run :focus
-
   config.order = 'random'
+
+  module FileFixtures
+    extend RSpec::Core::SharedContext
+    let (:file_doc) { "samples/April\ 13.doc" }
+    let (:file_ppt) { "samples/Lecture_5.ppt" }
+  end
+
+  config.include FileFixtures
 
   ::PRIVATE = YAML::load_file(File.expand_path('../private.yml', File.dirname(__FILE__)))
 end
