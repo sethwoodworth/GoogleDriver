@@ -1,12 +1,4 @@
-require_relative '../lib/rGooDrive.rb'
-require 'yaml'
-
-
-PRIVATE = YAML::load_file(
-            File.join(
-                File.dirname(File.expand_path(__FILE__)),
-                '../private.yml')
-      )
+require "spec_helper"
 
 
 file_doc = "samples/April\ 13.doc"
