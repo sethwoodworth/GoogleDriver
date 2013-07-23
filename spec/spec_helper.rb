@@ -11,11 +11,11 @@ RSpec.configure do |config|
 
   module FileFixtures
     extend RSpec::Core::SharedContext
-    let (:file_doc) { "samples/April\ 13.doc" }
-    let (:file_ppt) { "samples/Lecture_5.ppt" }
+    let (:file_doc) { File.expand_path("../files/April\ 13.doc", __FILE__) }
+    let (:file_ppt) { File.expand_path("../files/Lecture_5.ppt", __FILE__) }
   end
 
   config.include FileFixtures
 
-  ::PRIVATE = YAML::load_file(File.expand_path('../private.yml', File.dirname(__FILE__)))
+  ::PRIVATE = YAML::load_file(File.expand_path('../../private.yml', __FILE__))
 end
