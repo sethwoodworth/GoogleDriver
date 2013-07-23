@@ -13,7 +13,7 @@ describe GooDrive::Api do
   it "should authorize our Google API client" do
     # This is a poor test.
     # Maybe get the entirety of api.client and check that len > 500 ?
-    expect(api.client.class).to eq(Google::APIClient)
+    expect(api.client).to be_kind_of Google::APIClient
   end
 
   it "should upload a file" do
