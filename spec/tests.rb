@@ -8,8 +8,10 @@ PRIVATE = YAML::load_file(
                 '../private.yml')
       )
 
+
 file_doc = "samples/April\ 13.doc"
 file_ppt = "samples/Lecture_5.ppt"
+
 
 describe GDriveAPI do
 
@@ -47,8 +49,8 @@ describe GDriveAPI do
 
 end
 
-describe GDoc do
 
+describe GDoc do
 
   before(:each) do
     @api = GDriveAPI.new( PRIVATE['scope'], PRIVATE['issuer'], PRIVATE['p12_path'] )
@@ -64,12 +66,17 @@ describe GDoc do
   end
 
   it "should list the available export downloads" do
+    expect(@gdoc.list.class).to eq(Array)
+    expect(@gdoc.list.count).to be > 2
   end
 
   it "should reject a download if it doesn't recognize the type" do
+    @gdoc.download('this is not a mimetype')
   end
 
   it "should return the HTML of an uploaded document" do
+    html = @gdoc.download('text/html')
+    expect(html.slice(0..5)).to eq('<html>')
   end
 
 end

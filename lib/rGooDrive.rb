@@ -111,7 +111,10 @@ class GDriveAPI
 
     def upload_files ( *files )
         # TODO loop over files and pass them to self.upload
-        for f in files
+        files.each do |f|
+          # I expect ruby to return a list of results from this loop via yield
+          # somehow it expects to only be run from a block? Why doesn't this curry
+          # to an array?
           yield upload(f)
         end
     end
