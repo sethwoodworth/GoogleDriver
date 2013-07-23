@@ -5,33 +5,59 @@
 #
 #
 ####
+
 require 'open-uri'
 require 'google/api_client'
 
+class GDoc
+    attr_accessor :exports, :response
 
-class GdriveFile
-    # TODO refactor this into:
-    #   an api handler
-    #   an uploaded file class
+    def initialize( response, api )
+        @response = response
+        @exports = response.data.to_hash['exportLinks']
+        @api = api
+    end
+
+    def make_getters ( *links )
+        # create a getter for each of a list of export links
+        links.each do |link|
+            self.class_eval("def #{link};@#{link};end")
+        end
+    end
+
+    def list
+        @exports.keys
+    end
+
+    def download ( type )
+        if @exports.keys.include? type
+
+            fp = @api.client.execute(:uri => @exports[type])
+            return fp.body
+
+            #open(dest_file, 'wb') do |file|
+            #  file << fp.body
+            #end
+        end
+    end
+
+end
+
+
+class GDriveAPI
+    attr_accessor :client, :drive
 
     def initialize( scope, issuer, p12_path )
-
-
-        @files = []
         @OAUTH_SCOPE = scope
         @ISSUER = issuer
         @P12_PATH = p12_path
-    end
 
-    def detect_mimetype ( file )
-        # use the unix `file` program to get the mimetype of the file
-        %x<file --mime-type #{file}>.split(':')[1].strip()
-        # check success with $?.success? (perlism)
+        google_authorize
     end
 
     def google_authorize
         # creates self.@client and self.@drive objects for making
-        @client = Google::APIClient.new
+        @client = Google::APIClient.new(options={application_name:"test", application_version:"v0.0.0"})
         @drive = @client.discovered_api('drive', 'v2')
 
         # Create a new server<>server based API client
@@ -47,6 +73,13 @@ class GdriveFile
 
         @client.authorization.fetch_access_token!
     end
+
+    def detect_mimetype ( file )
+        # use the unix `file` program to get the mimetype of the file
+        %x<file --mime-type '#{file}'>.split(':')[1].strip()
+        # check success with $?.success? (perlism)
+    end
+
 
     # ::file            path to a file you wish to upload [REQUIRED]
     # ::title           title of the document for browsing on google drive
@@ -65,7 +98,7 @@ class GdriveFile
       media = Google::APIClient::UploadIO.new(file, mimetype)
 
       # TODO refactor this to return an UploadedFile object
-      @result = @client.execute(
+      response = @client.execute(
         :api_method => @drive.files.insert,
         :body_object => resource,
         :media => media,
@@ -73,34 +106,14 @@ class GdriveFile
           'uploadType' => 'multipart',
           'convert' => true,
           'alt' => 'json'})
+      return GDoc.new(response, self)
     end
 
-    def upload_files ( files )
+    def upload_files ( *files )
         # TODO loop over files and pass them to self.upload
-    end
-
-    def download ( type, dest_file )
-        # TODO download should be on the resulting file object
-        # TODO check for download `type` before downloading
-        links = @result.data.to_hash['exportLinks']
-        if links.keys.include? type
-            puts "yes, that type is available"
-
-            # TODO don't save to file by default, expose result(s)
-            open(dest_file, 'wb') do |file|
-              fp = @client.execute(:uri => links['text/html'])
-              file << fp.body
-            end
+        for f in files
+          yield upload(f)
         end
-    end
-
-
-    def test
-        puts self.detect_mimetype
-        self.google_authorize
-        self.upload()
-        puts @result.body
-        self.download('text/html', 'foobie.html')
     end
 
 end
