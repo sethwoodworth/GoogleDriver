@@ -1,14 +1,20 @@
+####
+#
+# A gem for uploading documents to google drive and downloading their exported
+# formats: html, plain/text
+#
+#
+####
 require 'open-uri'
 require 'google/api_client'
 
 
 class GdriveFile
+    # TODO refactor this into:
+    #   an api handler
+    #   an uploaded file class
 
-    def initialize(scope, issuer, p12_path, file )
-
-        # TODO: move file handling to self.upload()
-        @file_path = file
-        # TODO if file is a list, do this for all files
+    def initialize( scope, issuer, p12_path )
 
 
         @files = []
@@ -17,9 +23,9 @@ class GdriveFile
         @P12_PATH = p12_path
     end
 
-    def detect_mimetype
+    def detect_mimetype ( file )
         # use the unix `file` program to get the mimetype of the file
-        %x<file --mime-type #{@file_path}>.split(':')[1].strip()
+        %x<file --mime-type #{file}>.split(':')[1].strip()
         # check success with $?.success? (perlism)
     end
 
@@ -42,18 +48,23 @@ class GdriveFile
         @client.authorization.fetch_access_token!
     end
 
-    def upload
+    # ::file            path to a file you wish to upload [REQUIRED]
+    # ::title           title of the document for browsing on google drive
+    # ::description     description of the document for browsing on google drive
+    def upload (file, title="A document", description="Words, words, words")
       # TODO check for auth status, else: re-auth
-      # TODO make init vars for title & desc
+      # TODO make init vars for title & desc & file!
 
       resource = @drive.files.insert.request_schema.new({
-        'title' => 'My document',
-        'description' => 'A test document'
+        'title' => title,
+        'description' => description
       })
 
-      mimetype = detect_mimetype()
+      mimetype = detect_mimetype(file)
 
-      media = Google::APIClient::UploadIO.new(@file_path, mimetype)
+      media = Google::APIClient::UploadIO.new(file, mimetype)
+
+      # TODO refactor this to return an UploadedFile object
       @result = @client.execute(
         :api_method => @drive.files.insert,
         :body_object => resource,
@@ -64,12 +75,18 @@ class GdriveFile
           'alt' => 'json'})
     end
 
+    def upload_files ( files )
+        # TODO loop over files and pass them to self.upload
+    end
+
     def download ( type, dest_file )
-        # TODO: check for download `type` before downloading
+        # TODO download should be on the resulting file object
+        # TODO check for download `type` before downloading
         links = @result.data.to_hash['exportLinks']
         if links.keys.include? type
             puts "yes, that type is available"
 
+            # TODO don't save to file by default, expose result(s)
             open(dest_file, 'wb') do |file|
               fp = @client.execute(:uri => links['text/html'])
               file << fp.body
@@ -79,8 +96,6 @@ class GdriveFile
 
 
     def test
-        puts @OAUTH_SCOPE
-        puts @ISSUER
         puts self.detect_mimetype
         self.google_authorize
         self.upload()
@@ -89,4 +104,3 @@ class GdriveFile
     end
 
 end
-
