@@ -11,9 +11,6 @@ PRIVATE = YAML::load_file(
 file_doc = "samples/April\ 13.doc"
 file_ppt = "samples/Lecture_5.ppt"
 
-
-
-
 describe GDriveAPI do
 
   before(:each) do
@@ -38,6 +35,8 @@ describe GDriveAPI do
   end
 
   it "should upload a file" do
+    result = @api.upload(file_doc)
+    expect(result.class).to eq(GDoc)
   end
 
   it "should accept multiple file uploads at once" do
@@ -61,7 +60,7 @@ describe GDoc do
   end
 
   it "should have the original response available" do
-    expect(@gdoc.response.count).to be > 1000
+    expect(@gdoc.response.class).to eq(Google::APIClient::Result)
   end
 
   it "should list the available export downloads" do
