@@ -41,8 +41,8 @@ module GooDrive
     # ::title           title of the document for browsing on google drive
     # ::description     description of the document for browsing on google drive
     def upload(file, title="A document", description="Words, words, words")
-      # TODO check for auth status, else: re-auth
-      # TODO make init vars for title & desc & file!
+      #
+      # TODO: throw warning if people don't name documents
 
       resource = @drive.files.insert.request_schema.new(
         'title' => title,
@@ -53,7 +53,6 @@ module GooDrive
 
       media = Google::APIClient::UploadIO.new(file, mimetype)
 
-      # TODO refactor this to return an UploadedFile object
       response = @client.execute(
         api_method: @drive.files.insert,
         body_object: resource,
@@ -66,7 +65,6 @@ module GooDrive
     end
 
     def upload_files(*files)
-      # yield doesn't do what you think it does.
       files.map do |file|
         upload(file)
       end

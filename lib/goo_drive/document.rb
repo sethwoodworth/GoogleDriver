@@ -8,6 +8,8 @@ module GooDrive
       @api = api
     end
 
+    # Do we want mimetypes as getters?
+    # doc.application/pdf doesn't sound like a good getter to me
     def make_getters(*links)
       class << self
         links.each do |link|
